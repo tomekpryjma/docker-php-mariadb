@@ -1,15 +1,36 @@
 <?php
 
-try {
-    $pdo = new PDO('mysql:host=db;dbname=web', 'web', 'web');
-    $statement = $pdo->prepare('SELECT * FROM web.users');
+require __DIR__ . '/vendor/autoload.php';
 
-    $statement->execute();
+use App\Discount;
+use App\Scanner;
+use App\DiscountManager;
+use App\Cart;
+use App\Receipt;
+use App\Products\Strawberry;
+use App\Products\Car;
+use App\Products\Carrott;
+use App\Products\Door;
+use App\Products\ToiletPaper;
 
-    $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+$cart = new Cart;
+$discountManager = new DiscountManager;
+$scanner = new Scanner($discountManager);
 
-    print_r($result);
-} catch (Exception $e) {
-    echo $e->getMessage();
-    echo '<br/><strong>If you are seeing this - please create the missing table (or any table for that matter) this bit of code is for example purposes only.</strong>';
-}
+$discountManager->addDiscount(Strawberry::class, new Discount(3.99, 2));
+$discountManager->addDiscount(Carrott::class, new Discount(1.50, 3));
+$discountManager->addDiscount(Car::class, new Discount(250, 2)); // BOGOF
+
+$cart->addItems(
+    Carrott::factory(109, 0.45),
+    Strawberry::factory(5, 1.25),
+    ToiletPaper::factory(1, 3.50),
+    new Car(250),
+    new Door(50.65),
+    new Car(250)
+);
+
+$scanner->scanning($cart->getItems());
+$scanner->calculate();
+
+(new Receipt($scanner))->print();
