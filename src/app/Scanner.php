@@ -86,17 +86,7 @@ class Scanner
 
     public function listScanned()
     {
-        $longestNameLength = 0;
-
-        foreach ($this->scannedInstances as $instance) {
-            $nameLength = strlen($instance::getName());
-
-            if ($nameLength > $longestNameLength) {
-                $longestNameLength = $nameLength;
-            }
-        }
-
-        $formatted = array_map(function ($product, $quantity) use ($longestNameLength) {
+        $formatted = array_map(function ($product, $quantity) {
             $name = $product::getName();
             $iterations = Receipt::$width - (strlen($name) + strlen($quantity) + 1); // Account for the 'x' in quantity.
 
